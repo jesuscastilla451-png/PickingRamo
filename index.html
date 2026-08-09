@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Picking Ramo</title>
+
+    <link rel="stylesheet" href="styles.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+</head>
+
+<body>
+
+<div class="contenedor">
+
+    <h1>PICKING RAMO</h1>
+
+    <div class="cargaArchivos">
+
+        <label class="btnArchivo">
+            📚 Actualizar Base
+            <input type="file" id="archivoBase" accept=".xlsx,.xls" hidden>
+        </label>
+
+        <button id="btnDescargarBase" class="btnArchivo">
+            ⬇️ Descargar Base
+        </button>
+    
+        <button id="btnCargarPicking" class="btnArchivo">
+            📋 Cargar Picking
+        </button>
+
+        <button id="btnAgregarReferencia" class="btnArchivo">
+            ➕ Agregar Referencia
+        </button>
+    
+    </div>
+
+    <div id="estadoBase"></div>
+
+    <div id="modalPicking" class="modal">
+
+        <div class="modal-contenido picking-contenido">
+    
+            <h2>📋 Cargar Picking</h2>
+    
+            <p>
+                Pegue aquí las columnas:
+                <strong>ZONA, REFERENCIA y UNIDADES</strong>
+            </p>
+    
+            <textarea
+                id="datosPicking"
+                placeholder="ZONA    REFERENCIA    UNIDADES&#10;A       59004         3&#10;A       59044         5&#10;B       60442         2"
+            ></textarea>
+
+            <input
+              type="file"
+             id="archivoPicking"
+             accept=".xlsx,.xls"
+             style="display:none;"
+             >
+    
+            <div class="botones-modal">
+    
+                <button id="btnAceptarPicking">
+                    ✅ Cargar Picking
+                </button>
+    
+                <button id="btnCargarExcelPicking">
+                    📄 Cargar Excel
+                </button>
+
+                <button id="btnCancelarPicking">
+                    ❌ Cancelar
+                </button>
+    
+            </div>
+    
+        </div>
+    
+    </div>
+
+    <hr>
+
+    <h2 id="zona">ZONA</h2>
+
+    <div id="referencia" class="referencia"></div>
+
+    <div class="producto" id="producto">
+        CARGUE UN ARCHIVO
+    </div>
+
+    <div class="titulo">
+        UNIDADES
+    </div>
+
+    <div class="unidades" id="unidades">
+        0
+    </div>
+
+    <div class="botones">
+
+        <button id="btnAnterior">
+            ⬅ ATRÁS
+        </button>
+
+        <button id="btnSiguiente">
+            ✅ SIGUIENTE
+        </button>
+
+        <button id="btnNovedad">
+            ⚠ NOVEDAD
+        </button>
+    
+        <button id="btnPendiente">
+            🟡 PENDIENTE
+        </button>
+        
+        <button id="btnGuardar">
+            💾 GUARDAR
+        </button>
+
+        <button id="btnCalcular">
+            📦 CALCULAR
+        </button>
+
+            <div class="sectores">
+
+                <button id="btnA" onclick="cambiarSector('A')">A</button>
+            
+                <button id="btnB" onclick="cambiarSector('B')">B</button>
+            
+                <button id="btnC" onclick="cambiarSector('C')">C</button>
+            
+            </div>
+
+    <div id="progreso">
+        0 de 0
+    </div>
+
+</div>
+<!-- Ventana Calcular Empaque -->
+
+<div id="modalEmpaque" class="modal">
+
+    <div class="modal-contenido">
+
+        <h2>📦 Calcular Empaque</h2>
+
+        <p>¿Cuántas unidades trae la caja o canasta?</p>
+
+        <input
+            type="number"
+            id="txtEmpaque"
+            min="1"
+            inputmode="numeric"
+            placeholder="Ej: 12">
+
+        <br><br>
+
+        <button id="btnCancelarEmpaque">Cancelar</button>
+
+        <button id="btnAceptarEmpaque">Calcular</button>
+
+        <div id="resultadoEmpaque" class="resultadoEmpaque"></div>
+
+    </div>
+
+</div>
+<script src="app_backup.js"></script>
+
+</body>
+</html>
