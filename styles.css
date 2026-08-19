@@ -7,3 +7,11 @@ body{margin:0;padding:0;background:#f2f5f9;font-family:Arial,Helvetica,sans-seri
 .orden-moderno .datos{flex:1}
 .conductor-card{background:#fff;border:2px solid #ddd;border-radius:14px;padding:15px;margin:10px 0;text-align:left}
 .conductor-card h3{margin:0 0 8px}.badge{display:inline-block;border-radius:20px;padding:5px 10px;background:#eee;font-weight:bold}
+@media(max-width:600px){
+    .botones button{
+        min-height:48px;
+        padding:6px 8px;
+        font-size:16px;
+        border-radius:10px;
+    }
+}
