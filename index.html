@@ -1,98 +1,821 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Picking</title>
-<link rel="stylesheet" href="styles.css">
-<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>PICKING</title>
+
+    <!-- =========================
+         ICONOS DE LA APLICACIÓN
+         ========================= -->
+
+    <!-- Favicon para Chrome y navegadores -->
+    <link
+        rel="icon"
+        type="image/x-icon"
+        href="icons/favicon.ico"
+    >
+
+    <link
+        rel="shortcut icon"
+        type="image/x-icon"
+        href="icons/favicon.ico"
+    >
+
+    <!-- Icono para dispositivos Android -->
+    <link
+        rel="icon"
+        type="image/png"
+        sizes="192x192"
+        href="icons/icon-192.png"
+    >
+
+    <link
+        rel="icon"
+        type="image/png"
+        sizes="512x512"
+        href="icons/icon-512.png"
+    >
+
+    <!-- Icono para iPhone / iPad -->
+    <link
+        rel="apple-touch-icon"
+        sizes="180x180"
+        href="icons/apple-touch-icon.png"
+    >
+
+    <!-- =========================
+         ESTILOS
+         ========================= -->
+
+    <link
+        rel="stylesheet"
+        href="styles.css"
+    >
+
+    <!-- =========================
+         LIBRERÍA EXCEL
+         ========================= -->
+
+    <script
+        src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"
+    ></script>
+
 </head>
+
+
 <body>
-<div class="contenedor">
-<h1 id="tituloAplicacion">PICKING</h1>
-<div class="cargaArchivos">
-<label class="btnArchivo">📚 Actualizar Base<input type="file" id="archivoBase" accept=".xlsx,.xls" hidden></label>
-<button id="btnDescargarBase" class="btnArchivo">⬇️ Descargar Base</button>
-<button id="btnCargarPicking" class="btnArchivo">📋 Cargar Picking</button>
-<button id="btnAgregarReferencia" class="btnArchivo">➕ Agregar Referencia</button>
-<button id="btnAdministrarPickings" class="btnArchivo">📂 Pickings Cargados</button>
-<button id="btnCargarModerno" class="btnArchivo">🚚 Picking Moderno</button>
-<button id="btnCambiarNombre" class="btnArchivo">✏️ Nombre</button>
-</div>
-<div id="estadoBase"></div><div id="estadoPickings"></div><hr>
-<div id="pickingActualNombre" class="picking-actual"></div><div id="modernoInfo" class="moderno-info"></div>
-<h2 id="zona">ZONA</h2><div id="referencia" class="referencia"></div>
-<div class="producto" id="producto">CARGUE UN ARCHIVO</div>
-<div class="titulo">UNIDADES</div><div class="unidades" id="unidades">0</div>
-<div class="botones">
-<button id="btnAnterior">⬅ ATRÁS</button><button id="btnSiguiente">✅ SIGUIENTE</button>
-<button id="btnNovedad">⚠ NOVEDAD</button><button id="btnPendiente">🟡 PENDIENTE</button>
-<button id="btnGuardar">💾 GUARDAR</button><button id="btnCalcular">📦 CALCULAR</button>
-<div class="sectores"><button id="btnA" onclick="cambiarSector('A')">A</button><button id="btnB" onclick="cambiarSector('B')">B</button><button id="btnC" onclick="cambiarSector('C')">C</button></div>
-<div id="progreso">0 de 0</div>
-</div></div>
 
-<div id="modalModerno" class="modal"><div class="modal-contenido picking-contenido">
-<h2>🚚 Cargar Picking Moderno</h2>
-<p>Formato para copiar desde Extracción: <strong>CLIENTE, CONDUCTOR, REFERENCIA, UNIDADES</strong></p>
-<div class="fila-acciones"><button id="btnNuevoBloqueModerno">➕ Agregar hoja</button><button id="btnCargarExcelModerno">📄 Cargar Excel</button><input type="file" id="archivoModerno" accept=".xlsx,.xls" multiple hidden></div>
-<div id="listaBloquesModerno"></div>
-<div class="botones-modal"><button id="btnAceptarModerno">✅ Organizar</button><button id="btnCancelarModerno">❌ Cancelar</button></div>
-</div></div>
+    <div class="contenedor">
 
-<div id="modalOrdenModerno" class="modal"><div class="modal-contenido picking-contenido">
-<h2>🧭 Orden de referencias</h2><p>Orden inicial según la primera aparición. Puedes subir o bajar referencias.</p>
-<div id="listaOrdenModerno"></div>
-<div class="botones-modal"><button id="btnConfirmarOrdenModerno">✅ Confirmar</button><button id="btnCancelarOrdenModerno">Cancelar</button></div>
-</div></div>
+        <h1 id="tituloAplicacion">
+            PICKING
+        </h1>
 
-<div id="modalConductoresModerno" class="modal"><div class="modal-contenido picking-contenido">
-<h2>🚚 Conductores</h2><div id="listaConductoresModerno"></div>
-<div class="botones-modal"><button id="btnCerrarConductoresModerno">Cerrar</button></div>
-</div></div>
-<div id="modalPicking" class="modal"><div class="modal-contenido modal-grande">
-<h2>📋 Cargar Pickings</h2><p>Puedes pegar varios Pickings o seleccionar varios Excel.</p>
-<div class="fila-acciones"><button id="btnNuevoBloque">➕ Agregar Picking para pegar</button>
-<button id="btnCargarExcelPicking">📄 Seleccionar Excel</button><input type="file" id="archivoPicking" accept=".xlsx,.xls" multiple hidden></div>
-<div id="listaBloquesPicking"></div>
-<div class="botones-modal"><button id="btnAceptarPicking">✅ Cargar Pickings</button><button id="btnCancelarPicking">❌ Cancelar</button></div>
-</div></div>
 
-<div id="modalListaPickings" class="modal"><div class="modal-contenido modal-grande">
-<h2>📂 Pickings cargados</h2><div id="listaPickings"></div>
-<div class="botones-modal"><button id="btnCerrarListaPickings">Cerrar</button></div></div></div>
+        <!-- =========================
+             BOTONES PRINCIPALES
+             ========================= -->
 
-<div id="modalBase" class="modal"><div class="modal-contenido modal-base">
-<h2>📚 Base de referencias</h2><input id="buscarBase" class="buscador" type="search" placeholder="Buscar referencia o producto...">
-<div id="tablaBase" class="tabla-base"></div><div class="botones-modal"><button id="btnCerrarBase">Cerrar</button></div>
-</div></div>
+        <div class="cargaArchivos">
 
-<div id="modalAgregarReferencia" class="modal"><div class="modal-contenido modal-grande">
-<h2>➕ Agregar referencia</h2><div id="referenciaNuevaInfo" class="referencia-nueva-info"></div>
-<p>Consulta la Base antes de decidir el orden.</p>
-<input id="txtNuevaReferencia" type="text" placeholder="REFERENCIA">
-<input id="txtNuevoProducto" type="text" placeholder="PRODUCTO">
-<select id="selNuevoSector"><option value="">Seleccione sector</option><option>A</option><option>B</option><option>C</option></select>
-<input id="txtNuevoOrden" type="number" min="1" placeholder="ORDEN SECTOR">
-<button id="btnVerBaseAgregar">📚 Ver Base</button>
-<div class="botones-modal"><button id="btnGuardarReferencia">💾 Guardar</button><button id="btnCancelarAgregarReferencia">Cancelar</button></div>
-</div></div>
+            <label class="btnArchivo">
+                📚 Actualizar Base
 
-<div id="modalElegirPicking" class="modal"><div class="modal-contenido modal-grande">
-<h2>🎯 Elegir siguiente Picking</h2><p>Selecciona el que quieras hacer; no importa el orden de carga.</p>
-<div id="listaElegirPicking"></div><div class="botones-modal"><button id="btnCerrarElegirPicking">Cerrar</button></div>
-</div></div>
+                <input
+                    type="file"
+                    id="archivoBase"
+                    accept=".xlsx,.xls"
+                    hidden
+                >
+            </label>
 
-<div id="modalNombre" class="modal"><div class="modal-contenido">
-<h2>✏️ Nombre de la aplicación</h2><input id="txtNombreAplicacion" type="text" placeholder="Ej: PICKING">
-<div class="botones-modal"><button id="btnGuardarNombre">Guardar</button><button id="btnCancelarNombre">Cancelar</button></div>
-</div></div>
 
-<div id="modalEmpaque" class="modal"><div class="modal-contenido">
-<h2>📦 Calcular Empaque</h2><p>¿Cuántas unidades trae la caja o canasta?</p>
-<input type="number" id="txtEmpaque" min="1" inputmode="numeric" placeholder="Ej: 12"><br><br>
-<button id="btnCancelarEmpaque">Cancelar</button><button id="btnAceptarEmpaque">Calcular</button>
-<div id="resultadoEmpaque" class="resultadoEmpaque"></div>
-</div></div>
-<script src="app.js"></script>
-</body></html>
+            <button
+                id="btnDescargarBase"
+                class="btnArchivo"
+            >
+                ⬇️ Descargar Base
+            </button>
+
+
+            <button
+                id="btnCargarPicking"
+                class="btnArchivo"
+            >
+                📋 Cargar Picking
+            </button>
+
+
+            <button
+                id="btnAgregarReferencia"
+                class="btnArchivo"
+            >
+                ➕ Agregar Referencia
+            </button>
+
+
+            <button
+                id="btnAdministrarPickings"
+                class="btnArchivo"
+            >
+                📂 Pickings Cargados
+            </button>
+
+
+            <button
+                id="btnCargarModerno"
+                class="btnArchivo"
+            >
+                🚚 Picking Moderno
+            </button>
+
+
+            <button
+                id="btnCambiarNombre"
+                class="btnArchivo"
+            >
+                ✏️ Nombre
+            </button>
+
+        </div>
+
+
+        <!-- =========================
+             ESTADOS
+             ========================= -->
+
+        <div id="estadoBase"></div>
+
+        <div id="estadoPickings"></div>
+
+        <hr>
+
+
+        <!-- =========================
+             PICKING ACTUAL
+             ========================= -->
+
+        <div
+            id="pickingActualNombre"
+            class="picking-actual"
+        ></div>
+
+
+        <div
+            id="modernoInfo"
+            class="moderno-info"
+        ></div>
+
+
+        <h2 id="zona">
+            ZONA
+        </h2>
+
+
+        <div
+            id="referencia"
+            class="referencia"
+        ></div>
+
+
+        <div
+            class="producto"
+            id="producto"
+        >
+            CARGUE UN ARCHIVO
+        </div>
+
+
+        <div class="titulo">
+            UNIDADES
+        </div>
+
+
+        <div
+            class="unidades"
+            id="unidades"
+        >
+            0
+        </div>
+
+
+        <!-- =========================
+             BOTONES DEL PICKING
+             ========================= -->
+
+        <div class="botones">
+
+            <button id="btnAnterior">
+                ⬅ ATRÁS
+            </button>
+
+
+            <button id="btnSiguiente">
+                ✅ SIGUIENTE
+            </button>
+
+
+            <button id="btnNovedad">
+                ⚠ NOVEDAD
+            </button>
+
+
+            <button id="btnPendiente">
+                🟡 PENDIENTE
+            </button>
+
+
+            <button id="btnGuardar">
+                💾 GUARDAR
+            </button>
+
+
+            <button id="btnCalcular">
+                📦 CALCULAR
+            </button>
+
+
+            <!-- =========================
+                 SECTORES
+                 ========================= -->
+
+            <div class="sectores">
+
+                <button
+                    id="btnA"
+                    onclick="cambiarSector('A')"
+                >
+                    A
+                </button>
+
+
+                <button
+                    id="btnB"
+                    onclick="cambiarSector('B')"
+                >
+                    B
+                </button>
+
+
+                <button
+                    id="btnC"
+                    onclick="cambiarSector('C')"
+                >
+                    C
+                </button>
+
+            </div>
+
+
+            <div id="progreso">
+                0 de 0
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         MODAL PICKING MODERNO
+         ================================================== -->
+
+    <div
+        id="modalModerno"
+        class="modal"
+    >
+
+        <div
+            class="modal-contenido picking-contenido"
+        >
+
+            <h2>
+                🚚 Cargar Picking Moderno
+            </h2>
+
+
+            <p>
+                Formato para copiar desde Extracción:
+                <strong>
+                    CLIENTE, CONDUCTOR, REFERENCIA, UNIDADES
+                </strong>
+            </p>
+
+
+            <div class="fila-acciones">
+
+                <button id="btnNuevoBloqueModerno">
+                    ➕ Agregar hoja
+                </button>
+
+
+                <button id="btnCargarExcelModerno">
+                    📄 Cargar Excel
+                </button>
+
+
+                <input
+                    type="file"
+                    id="archivoModerno"
+                    accept=".xlsx,.xls"
+                    multiple
+                    hidden
+                >
+
+            </div>
+
+
+            <div id="listaBloquesModerno"></div>
+
+
+            <div class="botones-modal">
+
+                <button id="btnAceptarModerno">
+                    ✅ Organizar
+                </button>
+
+
+                <button id="btnCancelarModerno">
+                    ❌ Cancelar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         MODAL ORDEN MODERNO
+         ================================================== -->
+
+    <div
+        id="modalOrdenModerno"
+        class="modal"
+    >
+
+        <div
+            class="modal-contenido picking-contenido"
+        >
+
+            <h2>
+                🧭 Orden de referencias
+            </h2>
+
+
+            <p>
+                Orden inicial según la primera aparición.
+                Puedes subir o bajar referencias.
+            </p>
+
+
+            <div id="listaOrdenModerno"></div>
+
+
+            <div class="botones-modal">
+
+                <button id="btnConfirmarOrdenModerno">
+                    ✅ Confirmar
+                </button>
+
+
+                <button id="btnCancelarOrdenModerno">
+                    Cancelar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         MODAL CONDUCTORES MODERNO
+         ================================================== -->
+
+    <div
+        id="modalConductoresModerno"
+        class="modal"
+    >
+
+        <div
+            class="modal-contenido picking-contenido"
+        >
+
+            <h2>
+                🚚 Conductores
+            </h2>
+
+
+            <div id="listaConductoresModerno"></div>
+
+
+            <div class="botones-modal">
+
+                <button id="btnCerrarConductoresModerno">
+                    Cerrar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         MODAL CARGAR PICKINGS
+         ================================================== -->
+
+    <div
+        id="modalPicking"
+        class="modal"
+    >
+
+        <div
+            class="modal-contenido modal-grande"
+        >
+
+            <h2>
+                📋 Cargar Pickings
+            </h2>
+
+
+            <p>
+                Puedes pegar varios Pickings
+                o seleccionar varios Excel.
+            </p>
+
+
+            <div class="fila-acciones">
+
+                <button id="btnNuevoBloque">
+                    ➕ Agregar Picking para pegar
+                </button>
+
+
+                <button id="btnCargarExcelPicking">
+                    📄 Seleccionar Excel
+                </button>
+
+
+                <input
+                    type="file"
+                    id="archivoPicking"
+                    accept=".xlsx,.xls"
+                    multiple
+                    hidden
+                >
+
+            </div>
+
+
+            <div id="listaBloquesPicking"></div>
+
+
+            <div class="botones-modal">
+
+                <button id="btnAceptarPicking">
+                    ✅ Cargar Pickings
+                </button>
+
+
+                <button id="btnCancelarPicking">
+                    ❌ Cancelar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         MODAL LISTA DE PICKINGS
+         ================================================== -->
+
+    <div
+        id="modalListaPickings"
+        class="modal"
+    >
+
+        <div
+            class="modal-contenido modal-grande"
+        >
+
+            <h2>
+                📂 Pickings cargados
+            </h2>
+
+
+            <div id="listaPickings"></div>
+
+
+            <div class="botones-modal">
+
+                <button id="btnCerrarListaPickings">
+                    Cerrar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         MODAL BASE DE REFERENCIAS
+         ================================================== -->
+
+    <div
+        id="modalBase"
+        class="modal"
+    >
+
+        <div
+            class="modal-contenido modal-base"
+        >
+
+            <h2>
+                📚 Base de referencias
+            </h2>
+
+
+            <input
+                id="buscarBase"
+                class="buscador"
+                type="search"
+                placeholder="Buscar referencia o producto..."
+            >
+
+
+            <div
+                id="tablaBase"
+                class="tabla-base"
+            ></div>
+
+
+            <div class="botones-modal">
+
+                <button id="btnCerrarBase">
+                    Cerrar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         MODAL AGREGAR REFERENCIA
+         ================================================== -->
+
+    <div
+        id="modalAgregarReferencia"
+        class="modal"
+    >
+
+        <div
+            class="modal-contenido modal-grande"
+        >
+
+            <h2>
+                ➕ Agregar referencia
+            </h2>
+
+
+            <div
+                id="referenciaNuevaInfo"
+                class="referencia-nueva-info"
+            ></div>
+
+
+            <p>
+                Consulta la Base antes de decidir el orden.
+            </p>
+
+
+            <input
+                id="txtNuevaReferencia"
+                type="text"
+                placeholder="REFERENCIA"
+            >
+
+
+            <input
+                id="txtNuevoProducto"
+                type="text"
+                placeholder="PRODUCTO"
+            >
+
+
+            <select id="selNuevoSector">
+
+                <option value="">
+                    Seleccione sector
+                </option>
+
+                <option>
+                    A
+                </option>
+
+                <option>
+                    B
+                </option>
+
+                <option>
+                    C
+                </option>
+
+            </select>
+
+
+            <input
+                id="txtNuevoOrden"
+                type="number"
+                min="1"
+                placeholder="ORDEN SECTOR"
+            >
+
+
+            <button id="btnVerBaseAgregar">
+                📚 Ver Base
+            </button>
+
+
+            <div class="botones-modal">
+
+                <button id="btnGuardarReferencia">
+                    💾 Guardar
+                </button>
+
+
+                <button id="btnCancelarAgregarReferencia">
+                    Cancelar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         MODAL ELEGIR PICKING
+         ================================================== -->
+
+    <div
+        id="modalElegirPicking"
+        class="modal"
+    >
+
+        <div
+            class="modal-contenido modal-grande"
+        >
+
+            <h2>
+                🎯 Elegir siguiente Picking
+            </h2>
+
+
+            <p>
+                Selecciona el que quieras hacer;
+                no importa el orden de carga.
+            </p>
+
+
+            <div id="listaElegirPicking"></div>
+
+
+            <div class="botones-modal">
+
+                <button id="btnCerrarElegirPicking">
+                    Cerrar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         MODAL NOMBRE DE LA APLICACIÓN
+         ================================================== -->
+
+    <div
+        id="modalNombre"
+        class="modal"
+    >
+
+        <div class="modal-contenido">
+
+            <h2>
+                ✏️ Nombre de la aplicación
+            </h2>
+
+
+            <input
+                id="txtNombreAplicacion"
+                type="text"
+                placeholder="Ej: PICKING"
+            >
+
+
+            <div class="botones-modal">
+
+                <button id="btnGuardarNombre">
+                    Guardar
+                </button>
+
+
+                <button id="btnCancelarNombre">
+                    Cancelar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         MODAL EMPAQUE
+         ================================================== -->
+
+    <div
+        id="modalEmpaque"
+        class="modal"
+    >
+
+        <div class="modal-contenido">
+
+            <h2>
+                📦 Calcular Empaque
+            </h2>
+
+
+            <p>
+                ¿Cuántas unidades trae la caja o canasta?
+            </p>
+
+
+            <input
+                type="number"
+                id="txtEmpaque"
+                min="1"
+                inputmode="numeric"
+                placeholder="Ej: 12"
+            >
+
+
+            <br>
+            <br>
+
+
+            <button id="btnCancelarEmpaque">
+                Cancelar
+            </button>
+
+
+            <button id="btnAceptarEmpaque">
+                Calcular
+            </button>
+
+
+            <div
+                id="resultadoEmpaque"
+                class="resultadoEmpaque"
+            ></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         JAVASCRIPT PRINCIPAL
+         ================================================== -->
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>
