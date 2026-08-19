@@ -2674,19 +2674,20 @@ if(sinGuardar.length){
     menu.style.margin="10px auto";
 
     // Botón principal
-    let boton=document.createElement("button");
+let boton=document.createElement("button");
 
-    boton.type="button";
-    boton.id="btnAbrirMenu";
-    boton.textContent="☰ MENÚ";
+boton.type="button";
+boton.id="btnAbrirMenu";
+boton.textContent="☰ MENÚ";
 
-    boton.style.fontSize="18px";
-    boton.style.fontWeight="bold";
-    boton.style.padding="10px 24px";
-    boton.style.borderRadius="8px";
-    boton.style.border="1px solid #ccc";
-    boton.style.background="#f1f1f1";
-    boton.style.cursor="pointer";
+boton.style.fontSize="18px";
+boton.style.fontWeight="bold";
+boton.style.padding="8px 18px";
+boton.style.borderRadius="8px";
+boton.style.border="1px solid #ccc";
+boton.style.background="#f1f1f1";
+boton.style.cursor="pointer";
+boton.style.boxSizing="border-box";
 
     // Contenedor de opciones
     let opciones=document.createElement("div");
@@ -2696,8 +2697,8 @@ if(sinGuardar.length){
     opciones.style.display="none";
     opciones.style.position="absolute";
     opciones.style.top="100%";
-    opciones.style.left="50%";
-    opciones.style.transform="translateX(-50%)";
+    opciones.style.left="0";
+    opciones.style.transform="none";
     opciones.style.marginTop="6px";
     opciones.style.background="white";
     opciones.style.border="1px solid #ccc";
@@ -2705,7 +2706,9 @@ if(sinGuardar.length){
     opciones.style.boxShadow="0 5px 15px rgba(0,0,0,.25)";
     opciones.style.padding="8px";
     opciones.style.zIndex="9999";
-    opciones.style.minWidth="240px";
+    opciones.style.width="280px";
+    opciones.style.maxWidth="calc(100vw - 20px)";
+    opciones.style.boxSizing="border-box";
 
     function crearOpcion(texto,accion){
 
