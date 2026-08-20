@@ -2,6 +2,7 @@ let pickings=[], pickingActualIndex=-1, productos=[], baseProductos=[], indice=0
 
 const BASE_KEY="baseProductos";
 const PICKINGS_KEY="pickingCola";
+const ACTIVE_PICKING_KEY="pickingActivo";
 const APP_NAME_KEY="pickingAppName";
 
 const $=id=>document.getElementById(id);
@@ -59,9 +60,23 @@ function estado(p){
 
 function actualizar(){
 
-    let n=pickings.length;
+    /*
+       =====================================================
+       PICKING ACTIVO
+       =====================================================
+    */
 
-    if(!n){
+    let p=
+        pickings[pickingActualIndex];
+
+
+    /*
+       =====================================================
+       NO HAY PICKING ACTIVO
+       =====================================================
+    */
+
+    if(!p){
 
         $("estadoPickings").textContent="";
         $("pickingActualNombre").textContent="";
@@ -70,13 +85,159 @@ function actualizar(){
         return;
     }
 
+
+    /*
+       =====================================================
+       PICKING MODERNO
+       =====================================================
+
+       AQUÍ TENEMOS DOS NIVELES:
+
+       PICKING = CONDUCTOR
+
+       ACTIVO = PEDIDO DEL CONDUCTOR
+
+
+       Ejemplo:
+
+       Picking 1 → Rogelio → 3 pedidos
+
+       Activo 1 de 3
+       Activo 2 de 3
+       Activo 3 de 3
+
+
+       Luego:
+
+       Picking 2 → José → 1 pedido
+
+       Activo 1 de 1
+    */
+
     if(
-        pickingActualIndex<0 ||
-        !pickings[pickingActualIndex]
+        p.tipo==="MODERNO_CONDUCTOR"
     ){
 
-        $("estadoPickings").textContent=
-            `📂 Pickings: ${n} | Activo: 0 de ${n}`;
+        /*
+           Buscar el padre MODERNO.
+        */
+
+        let padre=
+            pickings.find(
+                x=>
+                    x.tipo==="MODERNO" &&
+                    x.nombre===p.padre
+            );
+
+
+        if(
+            !padre ||
+            !padre.moderno ||
+            !padre.moderno.conductores
+        ){
+
+            $("estadoPickings").textContent=
+                "📂 Picking: ? | Activo: ?";
+
+            $("pickingActualNombre").textContent="";
+            $("pickingActualNombre").style.display="none";
+
+            return;
+        }
+
+
+        /*
+           =================================================
+           OBTENER TODOS LOS CONDUCTORES
+           =================================================
+        */
+
+        let conductores=
+            Object.values(
+                padre.moderno.conductores
+            );
+
+
+        /*
+           =================================================
+           BUSCAR EL CONDUCTOR ACTUAL
+           =================================================
+
+           El conductor determina el número de PICKING.
+        */
+
+        let posicionConductor=
+            conductores.findIndex(
+                c=>
+                    String(c.nombre)
+                        .trim()
+                        .toUpperCase()===
+                    String(p.conductor)
+                        .trim()
+                        .toUpperCase()
+            );
+
+
+        /*
+           =================================================
+           OBTENER LOS PEDIDOS DEL CONDUCTOR
+           =================================================
+        */
+
+        let conductorActual=
+            posicionConductor>=0
+            ?conductores[posicionConductor]
+            :null;
+
+
+        let pedidos=
+            conductorActual &&
+            conductorActual.pedidos
+            ?Object.values(
+                conductorActual.pedidos
+            )
+            :[];
+
+
+        /*
+           =================================================
+           BUSCAR EL PEDIDO ACTUAL
+           =================================================
+
+           El pedido determina:
+
+           Activo X de Y
+        */
+
+        let posicionPedido=
+            pedidos.findIndex(
+                pedido=>
+                    String(pedido.id)===
+                    String(p.pedidoId)
+            );
+
+
+        /*
+           =================================================
+           MOSTRAR CONTADOR MODERNO
+           =================================================
+        */
+
+        if(
+            posicionConductor>=0 &&
+            posicionPedido>=0
+        ){
+
+            $("estadoPickings").textContent=
+                `📂 Picking: ${posicionConductor+1} | Activo: ${posicionPedido+1} de ${pedidos.length}`;
+
+        }else{
+
+            $("estadoPickings").textContent=
+                `📂 Picking: ${posicionConductor+1} | Activo: 0 de ${pedidos.length}`;
+
+        }
+
 
         $("pickingActualNombre").textContent="";
         $("pickingActualNombre").style.display="none";
@@ -84,17 +245,54 @@ function actualizar(){
         return;
     }
 
-    let p=
-        pickings[pickingActualIndex];
-
-    $("estadoPickings").textContent=
-        `📂 Pickings: ${n} | Activo: ${pickingActualIndex+1} de ${n}`;
 
     /*
-       El nombre del Picking ya no se muestra
-       porque la información importante aparece
-       en la pantalla principal.
+       =====================================================
+       PICKING NORMAL
+       =====================================================
+
+       Esta parte NO cambia la lógica de Tradicional /
+       Picking por Zona.
     */
+
+    let pickingsNormales=
+        pickings.filter(
+            x=>
+                x.tipo!=="MODERNO" &&
+                x.tipo!=="MODERNO_CONDUCTOR"
+        );
+
+
+    let total=
+        pickingsNormales.length;
+
+
+    if(!total){
+
+        $("estadoPickings").textContent="";
+        $("pickingActualNombre").textContent="";
+        $("pickingActualNombre").style.display="none";
+
+        return;
+    }
+
+
+    let posicion=
+        pickingsNormales.indexOf(p);
+
+
+    if(posicion>=0){
+
+        $("estadoPickings").textContent=
+            `📂 Pickings: ${total} | Activo: ${posicion+1} de ${total}`;
+
+    }else{
+
+        $("estadoPickings").textContent=
+            `📂 Pickings: ${total} | Activo: 0 de ${total}`;
+
+    }
+
 
     $("pickingActualNombre").textContent="";
     $("pickingActualNombre").style.display="none";
@@ -107,6 +305,11 @@ function cargarEn(i){
     sync();
 
     pickingActualIndex=i;
+
+    localStorage.setItem(
+        ACTIVE_PICKING_KEY,
+        String(i)
+    );
 
     let p=pickings[i];
 
@@ -1535,19 +1738,54 @@ function finalizar(){
                    =================================================
                 */
 
-                if(!todosTerminados){
+                   if(!todosTerminados){
 
                     /*
-                       No mostramos mensaje de guardar.
-                       Simplemente dejamos disponible
-                       Pickings Cargados para continuar.
+                       =====================================================
+                       EL PEDIDO ACTUAL TERMINÓ
+                       PERO TODAVÍA QUEDAN PEDIDOS DEL CONDUCTOR
+                       =====================================================
                     */
-
+                
+                    /*
+                       Actualizar completamente la ventana
+                       de Pickings Cargados.
+                    */
+                
                     listaPickings();
-
-                    $("modalListaPickings")
-                        .style.display="flex";
-
+                
+                
+                    /*
+                       Asegurarnos de que cualquier otra ventana
+                       de selección quede cerrada.
+                    */
+                
+                    if($("modalElegirPicking")){
+                
+                        $("modalElegirPicking")
+                            .style.display="none";
+                    }
+                
+                    if($("modalConductoresModerno")){
+                
+                        $("modalConductoresModerno")
+                            .style.display="none";
+                    }
+                
+                
+                    /*
+                       Abrir automáticamente Pickings Cargados.
+                    */
+                
+                    if($("modalListaPickings")){
+                
+                        $("modalListaPickings")
+                            .style.display="flex";
+                
+                        $("modalListaPickings")
+                            .style.zIndex="10000";
+                    }
+                
                     return;
                 }
 
@@ -2572,6 +2810,10 @@ if(sinGuardar.length){
 
     localStorage.removeItem(
         PICKINGS_KEY
+    );
+    
+    localStorage.removeItem(
+        ACTIVE_PICKING_KEY
     );
 
     /*
@@ -4039,25 +4281,95 @@ function trabajarModerno(
     pedidoId
 ){
 
+    /*
+       =====================================================
+       BUSCAR EL PICKING MODERNO PADRE
+       =====================================================
+
+       Ya no dependemos de modernoTrabajo ni de
+       modernoConductores.
+
+       La información real está guardada dentro
+       del Picking Moderno padre.
+    */
+
     let padre=
         pickings.find(
             p=>
-                p.tipo==="MODERNO" &&
-                p.moderno===modernoTrabajo
+                p.tipo==="MODERNO"
         );
 
-    if(!padre) return;
+    if(!padre){
+
+        alert(
+            "⚠️ No se encontró el Picking Moderno."
+        );
+
+        return;
+    }
+
 
     /*
-       Buscar solamente el pedido seleccionado.
+       =====================================================
+       BUSCAR EL CONDUCTOR
+       =====================================================
     */
 
-    let pedido=
-        modernoConductores[
+    let conductores=
+        padre.moderno &&
+        padre.moderno.conductores
+        ?padre.moderno.conductores
+        :{};
+
+    let claveConductor=
+        Object.keys(conductores).find(
+            k=>
+                String(k)
+                    .trim()
+                    .toUpperCase()===
+                String(conductor)
+                    .trim()
+                    .toUpperCase()
+        );
+
+    if(!claveConductor){
+
+        alert(
+            "⚠️ No se encontró el conductor:\n\n"+
             conductor
-        ]?.pedidos[
+        );
+
+        return;
+    }
+
+
+    /*
+       =====================================================
+       BUSCAR EL PEDIDO SELECCIONADO
+       =====================================================
+    */
+
+    let pedidos=
+        conductores[claveConductor].pedidos||{};
+
+    let pedido=
+        pedidos[
             pedidoId
         ];
+
+    if(!pedido){
+
+        /*
+           Por seguridad, comparar también como texto.
+        */
+
+        pedido=
+            Object.values(pedidos).find(
+                p=>
+                    String(p.id)===
+                    String(pedidoId)
+            );
+    }
 
     if(!pedido){
 
@@ -4068,21 +4380,47 @@ function trabajarModerno(
         return;
     }
 
+
     /*
-       Tomar únicamente las referencias
-       pertenecientes a este pedido.
+       =====================================================
+       OBTENER LAS REFERENCIAS DE ESTE PEDIDO
+       =====================================================
+
+       NO usamos otro pedido.
+
+       Buscamos exclusivamente por:
+       CONDUCTOR + PEDIDO_ID
     */
 
     let filas=
-        padre.productos.filter(
+        (padre.productos||[]).filter(
             x=>
-                x.CONDUCTOR===conductor &&
-                x.PEDIDO_ID===pedidoId
+                String(x.CONDUCTOR)
+                    .trim()
+                    .toUpperCase()===
+                String(conductor)
+                    .trim()
+                    .toUpperCase() &&
+                String(x.PEDIDO_ID)===
+                String(pedido.id)
         );
 
+
+    if(!filas.length){
+
+        alert(
+            "⚠️ El pedido fue encontrado, "+
+            "pero no tiene referencias para trabajar."
+        );
+
+        return;
+    }
+
+
     /*
-       Comprobar si este pedido ya existe
-       como Picking independiente.
+       =====================================================
+       BUSCAR SI EL PEDIDO YA EXISTE
+       =====================================================
     */
 
     let idx=
@@ -4090,17 +4428,26 @@ function trabajarModerno(
             p=>
                 p.tipo==="MODERNO_CONDUCTOR" &&
                 p.padre===padre.nombre &&
-                p.conductor===conductor &&
-                p.pedidoId===pedidoId
+                String(p.conductor)
+                    .trim()
+                    .toUpperCase()===
+                String(conductor)
+                    .trim()
+                    .toUpperCase() &&
+                String(p.pedidoId)===
+                String(pedido.id)
         );
 
+
     /*
-       Si todavía no existe, lo creamos.
+       =====================================================
+       SI NO EXISTE, CREARLO
+       =====================================================
     */
 
     if(idx<0){
 
-        pickings.push({
+        let nuevoPicking={
 
             nombre:
                 "Moderno - "+
@@ -4115,7 +4462,7 @@ function trabajarModerno(
                 conductor,
 
             pedidoId:
-                pedidoId,
+                pedido.id,
 
             cliente:
                 pedido.nombre,
@@ -4138,18 +4485,85 @@ function trabajarModerno(
 
             indice:0,
 
+            sectorActual:"",
+
+            modoPendientes:false,
+
+            guardado:false,
+
             creado:
                 new Date().toLocaleString()
-        });
+        };
+
+        pickings.push(
+            nuevoPicking
+        );
 
         idx=
             pickings.length-1;
 
         guardarCola();
+
+    }else{
+
+        /*
+           =================================================
+           EL PEDIDO YA EXISTE
+           =================================================
+
+           No reemplazamos sus productos porque puede
+           tener avance guardado.
+
+           Simplemente continuamos con ese Picking.
+        */
+
+        if(
+            !pickings[idx].productos ||
+            !pickings[idx].productos.length
+        ){
+
+            pickings[idx].productos=
+                JSON.parse(
+                    JSON.stringify(
+                        filas
+                    )
+                );
+        }
+
+        guardarCola();
     }
 
-    $("modalConductoresModerno")
-        .style.display="none";
+
+    /*
+       =====================================================
+       CERRAR VENTANAS
+       =====================================================
+    */
+
+    if($("modalConductoresModerno")){
+
+        $("modalConductoresModerno")
+            .style.display="none";
+    }
+
+    if($("modalListaPickings")){
+
+        $("modalListaPickings")
+            .style.display="none";
+    }
+
+    if($("modalElegirPicking")){
+
+        $("modalElegirPicking")
+            .style.display="none";
+    }
+
+
+    /*
+       =====================================================
+       CARGAR EL PEDIDO SELECCIONADO
+       =====================================================
+    */
 
     cargarEn(idx);
 }
@@ -4208,16 +4622,29 @@ function iniciar(){
        el primero como activo.
     */
 
-    if(pickings.length){
+       if(pickings.length){
 
-        cargarEn(0);
-
+        let activo=
+            parseInt(
+                localStorage.getItem(
+                    ACTIVE_PICKING_KEY
+                )
+            );
+    
+        if(
+            isNaN(activo) ||
+            activo<0 ||
+            activo>=pickings.length
+        ){
+            activo=0;
+        }
+    
+        cargarEn(activo);
+    
     }else{
-
+    
         mostrar();
     }
-
-    crearMenuPrincipal();
 }
 
 /* =========================================================
@@ -4500,3 +4927,4 @@ window.onbeforeunload=sync;
 */
 
 iniciar();
+crearMenuPrincipal();
