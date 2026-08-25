@@ -3441,7 +3441,7 @@ function leerHojaModerna(hoja,nombreHoja){
 
             let valor=normalizar(matriz[i][j]);
 
-            if(valor==="REFERENCIA"){
+            if(valor==="REFERENCIA" || valor==="CODG"){
                 filaReferencia=i;
                 columnaReferencia=j;
                 break;
