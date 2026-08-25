@@ -3008,26 +3008,26 @@ boton.style.boxSizing="border-box";
     );
 
     crearOpcion(
-        "📋 Cargar Picking",
-        ()=>{
-            abrirCarga();
-        }
-    );
+    "📋 Picking Tradicional / Zonas",
+    ()=>{
+        abrirCarga();
+    }
+);
 
-    crearOpcion(
-        "📂 Pickings Cargados",
-        ()=>{
-            listaPickings();
-            $("modalListaPickings").style.display="flex";
-        }
-    );
+crearOpcion(
+    "🚚 Picking Moderno",
+    ()=>{
+        abrirModerno();
+    }
+);
 
-    crearOpcion(
-        "🚚 Picking Moderno",
-        ()=>{
-            abrirModerno();
-        }
-    );
+crearOpcion(
+    "📂 Pickings Cargados",
+    ()=>{
+        listaPickings();
+        $("modalListaPickings").style.display="flex";
+    }
+);
 
     // Debajo de Picking Moderno
     crearOpcion(
@@ -3045,7 +3045,7 @@ boton.style.boxSizing="border-box";
     );
 
     crearOpcion(
-        "🧹 Finalizar Jornada",
+        "🧹 Finalizar",
         ()=>{
             finalizarJornada();
         }
