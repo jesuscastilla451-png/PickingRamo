@@ -1232,6 +1232,19 @@ function listaPickings(selector=false){
                     ).length
                     :cantidad;
 
+                    let unidadesPedido=
+                    hijo
+                    ?hijo.productos.reduce(
+                        (total,x)=>
+                           total+Number(x.UNIDADES||0),
+                        0
+                    )
+                    :pedido.filas.reduce(
+                        (total,x)=>
+                            total+Number(x.UNIDADES||0),
+                        0
+                    );
+
                 let pedidoDiv=
                     document.createElement(
                         "div"
@@ -1277,6 +1290,9 @@ function listaPickings(selector=false){
                     |
                     Pendientes:
                     ${pendientesPedido}
+                    <br>
+                    📊 Unidades:
+                    ${unidadesPedido}
                     <br>
                     <span class="${
                         estadoPedido==="TERMINADO"
@@ -4176,6 +4192,13 @@ function mostrarConductoresModerno(){
             let referencias=
                 pedido.filas.length;
 
+            let unidades=
+                pedido.filas.reduce(
+                   (total,fila)=>
+                      total+Number(fila.UNIDADES||0),
+                   0
+                );
+
             /*
                Convertir número de columna
                a letra de Excel.
@@ -4251,7 +4274,10 @@ function mostrarConductoresModerno(){
                 '</small>'+
                 '<br>'+
                 '📦 Referencias: '+
-                referencias;
+                referencias+
+                '<br>'+
+                '📊 Unidades: '+
+                unidades;
 
             let b=
                 document.createElement(
